@@ -29,8 +29,8 @@ namespace Galaga
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 144;
-            graphics.PreferredBackBufferHeight = 208;
+            graphics.PreferredBackBufferWidth = 576;
+            graphics.PreferredBackBufferHeight = 832;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
@@ -49,7 +49,7 @@ namespace Galaga
             tex = Content.Load<Texture2D>("GalagaSprites");
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
-            //Needs to be optimized
+            //Needs to be optimized - Nick
             //using (var stream = TitleContainer.OpenStream("Level1.txt"))
             //{
             //    using (var reader = new StreamReader(stream))
@@ -68,11 +68,11 @@ namespace Galaga
                     if (lvl1Data[r].Substring(c, 1).Equals(" "))
                         enemies[r][c] = null;
                     else
-                        enemies[r][c] = new Enemy(tex, new Rectangle(c * 16, r * 16 + 16, 16, 16), int.Parse(lvl1Data[r].Substring(c, 1)));
+                        enemies[r][c] = new Enemy(tex, new Rectangle(c * 64, (r + 1) * 64, 64, 64), int.Parse(lvl1Data[r].Substring(c, 1)));
                 }
             }
 
-            p1 = new Player(tex, new Rectangle(64, 192, 16, 16));
+            p1 = new Player(tex, new Rectangle(256, 768, 64, 64));
             score = 0;
             base.Initialize();
         }
