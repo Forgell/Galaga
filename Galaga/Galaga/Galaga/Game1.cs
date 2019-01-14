@@ -11,19 +11,29 @@ using Microsoft.Xna.Framework.Media;
 
 namespace Galaga
 {
-	/// <summary>
-	/// This is the main type for your game
-	/// </summary>
-	public class Game1 : Microsoft.Xna.Framework.Game
-	{
-		GraphicsDeviceManager graphics;
-		SpriteBatch spriteBatch;
-		Stars field;
-		public Game1()
-		{
-			graphics = new GraphicsDeviceManager(this);
-			Content.RootDirectory = "Content";
-		}
+    /// <summary>
+    /// This is the main type for your game
+    /// </summary>
+    public class Game1 : Microsoft.Xna.Framework.Game
+    {
+        GraphicsDeviceManager graphics;
+        SpriteBatch spriteBatch;
+        Stars field;
+        Texture2D tex;
+        Rectangle window;
+        string[] lvl1Data;
+        Enemy[][] enemies;
+        Player p1;
+        int score;
+        SpriteFont font1;
+        public Game1()
+        {
+            graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = 144;
+            graphics.PreferredBackBufferHeight = 208;
+            graphics.ApplyChanges();
+            Content.RootDirectory = "Content";
+        }
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
