@@ -120,7 +120,7 @@ namespace Galaga
 			screen = new Rectangle(0, 0, graphics.Viewport.Width, graphics.Viewport.Height);
 			r = new Random();
 			x = 0;
-			stars = new Star[150];
+			stars = new Star[graphics.Viewport.Width*graphics.Viewport.Height/2560];
 		}
 		public void Update(GameTime gameTime)
 		{
@@ -167,7 +167,7 @@ namespace Galaga
 		}
 		protected Star newStar()
 		{
-			return new Star(new Rectangle(0, 0, 2, 2), new Color(r.Next(255), r.Next(255), r.Next(255), r.Next(255)), new Vector2(r.Next(screen.Width + 1), 0), new Vector2(0, r.Next(12) + 5));
+			return new Star(new Rectangle(0, 0, 2, 2), new Color(r.Next(255), r.Next(255), r.Next(255), r.Next(255)), new Vector2(r.Next(screen.Width + 1), 0), new Vector2(0, r.Next(graphics.Viewport.Height / 40) + graphics.Viewport.Height / 96));
 		}
 	}
 }

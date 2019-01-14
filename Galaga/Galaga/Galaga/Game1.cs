@@ -45,7 +45,7 @@ namespace Galaga
         {
             // TODO: Add your initialization logic here
             field = new Stars(GraphicsDevice);
-
+			Console.Write(GraphicsDevice.Viewport.Width + ", " + GraphicsDevice.Viewport.Height);
             tex = Content.Load<Texture2D>("GalagaSprites");
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
