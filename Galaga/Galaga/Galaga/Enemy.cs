@@ -23,11 +23,11 @@ namespace Galaga
         {
             tex = t;
             hitbox = rec;
-            sheetRec = new Rectangle(level * 16 + 16, 0, 16, 16);
+            sheetRec = new Rectangle((level + 1) * 64, 0, 64, 64);
             origin = new Vector2(sheetRec.Width / 2, sheetRec.Height / 2);
             angle = 0;
             timer = 0;
-            xV = 1;
+            xV = 4;
             lvl = level;
         }
 
@@ -43,7 +43,7 @@ namespace Galaga
                 if (lvl == 3)
                 {
                     lvl = 4;
-                    sheetRec.X += 16;
+                    sheetRec.X += 64;
                 }
                 else if (lvl == 4)
                     lvl = 3;
@@ -61,14 +61,14 @@ namespace Galaga
                 xV *= -1;
             }
             else if (timer == 16)
-                sheetRec.Y = 16;
+                sheetRec.Y = 64;
             if (timer % 2 == 0)
                 hitbox.X += xV;
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Draw(tex, new Vector2(hitbox.X + 8, hitbox.Y + 8), sheetRec, Color.White, angle, origin, 1, SpriteEffects.None, 0);
+            spriteBatch.Draw(tex, new Vector2(hitbox.X + 32, hitbox.Y + 32), sheetRec, Color.White, angle, origin, 1, SpriteEffects.None, 0);
         }
     }
 }
