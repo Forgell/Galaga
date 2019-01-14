@@ -20,7 +20,7 @@ namespace Galaga
         {
             tex = t;
             hitbox = rec;
-            sheetRec = new Rectangle(0, 64, 16, 32);
+            sheetRec = new Rectangle(0, 32, 8, 16);
         }
 
         public Rectangle Hitbox
@@ -30,7 +30,7 @@ namespace Galaga
 
         public void Update(GameTime gameTime)
         {
-            hitbox.Y -= 8;
+            hitbox.Y -= 6;
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)

@@ -24,7 +24,7 @@ namespace Galaga
         {
             tex = t;
             hitbox = rec;
-            sheetRec = new Rectangle(0, 0, 64, 64);
+            sheetRec = new Rectangle(0, 0, 32, 32);
             origin = new Vector2(sheetRec.Width / 2, sheetRec.Height / 2);
             angle = 0;
             bullets = new List<Bullet>();
@@ -44,12 +44,12 @@ namespace Galaga
         public void Update(GameTime gameTime)
         {
             KeyboardState kb = Keyboard.GetState();
-            if (kb.IsKeyDown(Keys.Right) && hitbox.X <= 512)
-                hitbox.X += 4;
+            if (kb.IsKeyDown(Keys.Right) && hitbox.X <= 256)
+                hitbox.X += 2;
             if (kb.IsKeyDown(Keys.Left) && hitbox.X >= 0)
-                hitbox.X -= 4;
+                hitbox.X -= 2;
             if (kb.IsKeyDown(Keys.Space) && !oldKb.IsKeyDown(Keys.Space) && bullets.Count < 2)
-                bullets.Add(new Bullet(tex, new Rectangle(hitbox.X + 24, hitbox.Y - 32, 16, 32)));
+                bullets.Add(new Bullet(tex, new Rectangle(hitbox.X + 12, hitbox.Y - 16, 8, 16)));
             for (int i = 0; i < bullets.Count; i++)
                 bullets[i].Update(gameTime);
             oldKb = kb;
@@ -57,7 +57,7 @@ namespace Galaga
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Draw(tex, new Vector2(hitbox.X +32, hitbox.Y + 32), sheetRec, Color.White, angle, origin, 1, SpriteEffects.None, 0);
+            spriteBatch.Draw(tex, new Vector2(hitbox.X + origin.X, hitbox.Y + origin.Y), sheetRec, Color.White, angle, origin, 1, SpriteEffects.None, 0);
             for (int i = 0; i < bullets.Count; i++)
                 bullets[i].Draw(spriteBatch, gameTime);
         }
