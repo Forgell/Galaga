@@ -25,6 +25,8 @@ namespace Galaga
         Enemy[][] enemies;
         Player p1;
         int score;
+        SoundEffect explosion;
+        List<Explosion> explosions;
         SpriteFont font1;
         public Game1()
         {
@@ -72,8 +74,11 @@ namespace Galaga
                 }
             }
 
-            p1 = new Player(tex, new Rectangle(128, 384, 32, 32));
+            p1 = new Player(tex, new Rectangle(128, 384, 32, 32), window);
             score = 0;
+
+            explosions = new List<Explosion>();
+
             base.Initialize();
         }
 
@@ -87,6 +92,7 @@ namespace Galaga
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            explosion = Content.Load<SoundEffect>("galaga_destroyed");
             font1 = Content.Load<SpriteFont>("SpriteFont1");
         }
 
@@ -123,6 +129,7 @@ namespace Galaga
                                 if (enemies[r][c].Level != 4)
                                 {
                                     score += enemies[r][c].Level * 50;
+                                    explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
                                     enemies[r][c] = null;
                                 }
                                 p1.RemoveBulletAt(i);
@@ -132,6 +139,12 @@ namespace Galaga
             for (int i = bullets.Count - 1; i > -1; i--)
                 if (!bullets[i].Hitbox.Intersects(window))
                     p1.RemoveBulletAt(i);
+            for (int i = explosions.Count - 1; i > -1 ; i--)
+            {
+                explosions[i].Update(gameTime);
+                if (explosions[i].Timer > 40)
+                    explosions.RemoveAt(i);
+            }
             p1.Update(gameTime);
 
             base.Update(gameTime);
@@ -152,6 +165,8 @@ namespace Galaga
                     if (enemies[r][c] != null)
                         enemies[r][c].Draw(spriteBatch, gameTime);
             p1.Draw(spriteBatch, gameTime);
+            for (int i = 0; i < explosions.Count; i++)
+                explosions[i].Draw(spriteBatch, gameTime);
             spriteBatch.End();
             // TODO: Add your drawing code here
 

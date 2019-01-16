@@ -36,6 +36,11 @@ namespace Galaga
             get { return lvl; }
         }
 
+        public Rectangle Hitbox
+        {
+            get { return hitbox; }
+        }
+
         public bool Intersects(Bullet bullet)
         {
             if (hitbox.Intersects(bullet.Hitbox))
