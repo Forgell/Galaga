@@ -29,8 +29,8 @@ namespace Galaga
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 576;
-            graphics.PreferredBackBufferHeight = 832;
+            graphics.PreferredBackBufferWidth = 288;
+            graphics.PreferredBackBufferHeight = 416;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
@@ -68,11 +68,11 @@ namespace Galaga
                     if (lvl1Data[r].Substring(c, 1).Equals(" "))
                         enemies[r][c] = null;
                     else
-                        enemies[r][c] = new Enemy(tex, new Rectangle(c * 64, (r + 1) * 64, 64, 64), int.Parse(lvl1Data[r].Substring(c, 1)));
+                        enemies[r][c] = new Enemy(tex, new Rectangle(c * 32, (r + 1) * 32, 32, 32), int.Parse(lvl1Data[r].Substring(c, 1)));
                 }
             }
 
-            p1 = new Player(tex, new Rectangle(256, 768, 64, 64));
+            p1 = new Player(tex, new Rectangle(128, 384, 32, 32));
             score = 0;
             base.Initialize();
         }
