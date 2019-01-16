@@ -14,13 +14,13 @@ namespace Galaga
     class Player
     {
         Texture2D tex;
-        Rectangle hitbox, sheetRec;
+        Rectangle hitbox, sheetRec, window;
         Vector2 origin;
         float angle;
         List<Bullet> bullets;
         KeyboardState oldKb;
 
-        public Player(Texture2D t, Rectangle rec)
+        public Player(Texture2D t, Rectangle rec, Rectangle window)
         {
             tex = t;
             hitbox = rec;
@@ -29,6 +29,7 @@ namespace Galaga
             angle = 0;
             bullets = new List<Bullet>();
             oldKb = Keyboard.GetState();
+            this.window = window;
         }
 
         public List<Bullet> Bullets
@@ -44,7 +45,7 @@ namespace Galaga
         public void Update(GameTime gameTime)
         {
             KeyboardState kb = Keyboard.GetState();
-            if (kb.IsKeyDown(Keys.Right) && hitbox.X <= 256)
+            if (kb.IsKeyDown(Keys.Right) && hitbox.X < window.Width - hitbox.Width)
                 hitbox.X += 2;
             if (kb.IsKeyDown(Keys.Left) && hitbox.X >= 0)
                 hitbox.X -= 2;
