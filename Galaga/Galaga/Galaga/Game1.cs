@@ -48,6 +48,8 @@ namespace Galaga
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// TODO: use this.Content to load your game content here
+
+            
 		}
 
 		/// <summary>
