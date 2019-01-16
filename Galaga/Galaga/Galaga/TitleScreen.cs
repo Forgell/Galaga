@@ -21,12 +21,21 @@ namespace Galaga
         {
 
             this.textBanner = textBanner;
-            int width = screenWidth / 4;
-            int height = screenHeight / 4;
-            this.rectBanner = new Rectangle(screenWidth / 2 , screenHeight / 2 , screenWidth , screenHeight);
-            start = new Button("start" , new Vector2(width , height) , font);
-            leaderBoard = new Button("leaderBoard", new Vector2(width, height), font);
+            int x = screenWidth / 4;
+            int y = screenHeight / 2;
+            this.rectBanner = new Rectangle((screenWidth  * 4)/ 5  - ((screenWidth*5)/8), screenHeight / 4 - (screenHeight  / 8) , (screenWidth * 2)/3 , screenHeight/4);
+            Console.WriteLine();
+            Console.WriteLine(rectBanner.Y );
+            Console.WriteLine();
+            start = new Button("start" , new Vector2(x , y) , font);
+            leaderBoard = new Button("leaderBoard", new Vector2(x, y + screenHeight/15), font);
 
+        }
+
+        public bool update(int x , int y, bool pressed)
+        {
+            
+            return start.preesed(x, y) && pressed;
         }
 
         public void draw(SpriteBatch spriteBatch)

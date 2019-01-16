@@ -28,6 +28,7 @@ namespace Galaga
         SpriteFont font1;
         // Qualans Code
         bool isGameOn;
+        TitleScreen titleScreen;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -79,6 +80,7 @@ namespace Galaga
 
             // Qualans Code
             isGameOn = false;
+            IsMouseVisible = true;
             base.Initialize();
         }
 
@@ -93,6 +95,10 @@ namespace Galaga
 
             // TODO: use this.Content to load your game content here
             font1 = Content.Load<SpriteFont>("SpriteFont1");
+            SpriteFont qFont = Content.Load<SpriteFont>("QualansFont");
+            Texture2D bannderText = Content.Load<Texture2D>("banner");
+            titleScreen = new TitleScreen( bannderText, qFont , window.Width , window.Height);
+
         }
 
         /// <summary>
@@ -146,6 +152,8 @@ namespace Galaga
             {
                 // Qualans Code
                 // default to title screen
+                
+                isGameOn = titleScreen.update(Mouse.GetState().X, Mouse.GetState().Y, Mouse.GetState().LeftButton == ButtonState.Pressed);
             }
             
 
@@ -158,16 +166,25 @@ namespace Galaga
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-            spriteBatch.Begin();
-            field.Draw(gameTime, spriteBatch);
-            spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
-            for (int r = 0; r < enemies.Length; r++)
-                for (int c = 0; c < enemies[r].Length; c++)
-                    if (enemies[r][c] != null)
-                        enemies[r][c].Draw(spriteBatch, gameTime);
-            p1.Draw(spriteBatch, gameTime);
-            spriteBatch.End();
+            
+            if (isGameOn)
+            {
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+                spriteBatch.Begin();
+                field.Draw(gameTime, spriteBatch);
+                spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
+                for (int r = 0; r < enemies.Length; r++)
+                    for (int c = 0; c < enemies[r].Length; c++)
+                        if (enemies[r][c] != null)
+                            enemies[r][c].Draw(spriteBatch, gameTime);
+                p1.Draw(spriteBatch, gameTime);
+                spriteBatch.End();
+            }else
+            {
+                GraphicsDevice.Clear(Color.Black);
+                titleScreen.draw(spriteBatch);
+            }
+            
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
