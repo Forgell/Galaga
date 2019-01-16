@@ -14,14 +14,28 @@ namespace Galaga
     class Explosion
     {
         Texture2D tex;
-        Rectangle rec, sheetPos;
+        Rectangle rec, sheetRec;
         int timer;
 
+        //Default enemy explosion
         public Explosion(Texture2D t, Rectangle pos, SoundEffect explosion)
         {
             tex = t;
             rec = new Rectangle(pos.X - 16, pos.Y - 16, 64, 64);
-            sheetPos = new Rectangle(0, 128, 64, 64);
+            sheetRec = new Rectangle(0, 128, 64, 64);
+            timer = 0;
+            explosion.Play();
+        }
+
+        //Player explosion
+        public Explosion(Texture2D t, Rectangle pos, SoundEffect explosion, bool player)
+        {
+            tex = t;
+            rec = new Rectangle(pos.X - 16, pos.Y - 16, 64, 64);
+            if (player)
+                sheetRec = new Rectangle(0, 64, 64, 64);
+            else
+                sheetRec = new Rectangle(0, 128, 64, 64);
             timer = 0;
             explosion.Play();
         }
@@ -33,13 +47,13 @@ namespace Galaga
 
         public void Update(GameTime gameTime)
         {
-            sheetPos.X = timer / 8 * 64;
+            sheetRec.X = timer / 8 * 64;
             timer++;
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Draw(tex, rec, sheetPos, Color.White);
+            spriteBatch.Draw(tex, rec, sheetRec, Color.White);
         }
     }
 }

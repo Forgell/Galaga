@@ -25,14 +25,16 @@ namespace Galaga
         Enemy[][] enemies;
         Player p1;
         int score;
-        SoundEffect explosion;
+        SoundEffect explosion, playerExplosion;
         List<Explosion> explosions;
         SpriteFont font1;
+        string centerText;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 288;
-            graphics.PreferredBackBufferHeight = 416;
+            graphics.PreferredBackBufferHeight = 448;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
@@ -74,8 +76,9 @@ namespace Galaga
                 }
             }
 
-            p1 = new Player(tex, new Rectangle(128, 384, 32, 32), window);
+            p1 = new Player(tex, new Rectangle(window.Width / 2 - 16, window.Height - 64, 32, 32), window);
             score = 0;
+            centerText = "";
 
             explosions = new List<Explosion>();
 
@@ -93,6 +96,7 @@ namespace Galaga
 
             // TODO: use this.Content to load your game content here
             explosion = Content.Load<SoundEffect>("galaga_destroyed");
+            playerExplosion = Content.Load<SoundEffect>("fighter_destroyed");
             font1 = Content.Load<SpriteFont>("SpriteFont1");
         }
 
@@ -146,6 +150,10 @@ namespace Galaga
                     explosions.RemoveAt(i);
             }
             p1.Update(gameTime);
+            if (p1.Timer != 0)
+                centerText = "READY?";
+            else
+                centerText = "";
 
             base.Update(gameTime);
         }
@@ -167,6 +175,7 @@ namespace Galaga
             p1.Draw(spriteBatch, gameTime);
             for (int i = 0; i < explosions.Count; i++)
                 explosions[i].Draw(spriteBatch, gameTime);
+            spriteBatch.DrawString(font1, centerText, new Vector2(window.Width / 2 - 40, window.Height / 2 - 8), Color.Red);
             spriteBatch.End();
             // TODO: Add your drawing code here
 
