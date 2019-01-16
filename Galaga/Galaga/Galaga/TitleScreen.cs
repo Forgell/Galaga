@@ -1,0 +1,108 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.GamerServices;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
+
+namespace Galaga
+{
+    class TitleScreen
+    {
+        Button start;
+        Button leaderBoard;
+        Texture2D textBanner;
+        Rectangle rectBanner;
+        public TitleScreen(Texture2D textBanner ,SpriteFont font , int screenWidth , int screenHeight)
+        {
+
+            this.textBanner = textBanner;
+            int width = screenWidth / 4;
+            int height = screenHeight / 4;
+            this.rectBanner = new Rectangle(screenWidth / 2 , screenHeight / 2 , screenWidth , screenHeight);
+            start = new Button("start" , new Vector2(width , height) , font);
+            leaderBoard = new Button("leaderBoard", new Vector2(width, height), font);
+
+        }
+
+        public void draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Begin();
+            spriteBatch.Draw(textBanner , rectBanner , Color.White);
+            spriteBatch.End();
+            start.Draw(spriteBatch);
+            leaderBoard.Draw(spriteBatch);
+        }
+    }
+    class Button{
+        string text;
+        Texture2D image;
+        Rectangle rect;
+        bool isImage;
+        SpriteFont font;
+        Vector2 pos;
+        int width, height;
+        Rectangle temp;
+        Rectangle temp2;
+        public Button(string text, Vector2 pos , SpriteFont font)
+        {
+            Vector2 dems = font.MeasureString(text);
+            this.text = text;
+            this.pos = pos;
+            isImage = false;
+            this.font = font;
+            this.width = (int)dems.X;
+            this.height = (int)dems.Y;
+            temp = new Rectangle();
+            temp2 = new Rectangle();
+        }
+
+        public Button(Texture2D image , Rectangle rect)
+        {
+            this.image = image;
+            this.rect = rect;
+            isImage = true;
+            temp = new Rectangle();
+        }
+
+        public Boolean preesed(int x , int y)
+        {
+            if (isImage)
+            {
+                temp.X = x;
+                temp.Y = y;
+                temp.Width = 1;
+                temp.Height = 1;
+                return temp.Intersects(rect);
+            }
+            // if text
+            temp.X = (int)(pos.X);
+            temp.Y = (int)pos.Y;
+            temp.Width = width;
+            temp.Height = height;
+            temp2.X = x;
+            temp2.Y = y;
+            temp2.Width = 1;
+            temp2.Height = 1;
+            return temp.Intersects(temp2);
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Begin();
+            if (isImage)
+            {
+                spriteBatch.Draw(image,  rect, Color.White);
+            }else
+            {
+                spriteBatch.DrawString(font , text , pos , Color.White);
+            }
+            
+            spriteBatch.End();
+        }
+    }
+}
