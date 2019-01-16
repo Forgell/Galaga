@@ -26,6 +26,8 @@ namespace Galaga
         Player p1;
         int score;
         SpriteFont font1;
+        // Qualans Code
+        bool isGameOn;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -74,6 +76,9 @@ namespace Galaga
 
             p1 = new Player(tex, new Rectangle(128, 384, 32, 32));
             score = 0;
+
+            // Qualans Code
+            isGameOn = false;
             base.Initialize();
         }
 
@@ -111,28 +116,38 @@ namespace Galaga
                 this.Exit();
             field.Update(gameTime);
             // TODO: Add your update logic here
-            List<Bullet> bullets = p1.Bullets;
-            for (int r = 0; r < enemies.Length; r++)
-                for (int c = 0; c < enemies[r].Length; c++)
-                    if (enemies[r][c] != null)
-                    {
-                        enemies[r][c].Update(gameTime);
-                        for (int i = bullets.Count - 1; i > -1; i--)
-                            if (enemies[r][c].Intersects(bullets[i]))
-                            {
-                                if (enemies[r][c].Level != 4)
+            // Qualans code
+            if (isGameOn)
+            {
+                // other peaples code
+                List<Bullet> bullets = p1.Bullets;
+                for (int r = 0; r < enemies.Length; r++)
+                    for (int c = 0; c < enemies[r].Length; c++)
+                        if (enemies[r][c] != null)
+                        {
+                            enemies[r][c].Update(gameTime);
+                            for (int i = bullets.Count - 1; i > -1; i--)
+                                if (enemies[r][c].Intersects(bullets[i]))
                                 {
-                                    score += enemies[r][c].Level * 50;
-                                    enemies[r][c] = null;
+                                    if (enemies[r][c].Level != 4)
+                                    {
+                                        score += enemies[r][c].Level * 50;
+                                        enemies[r][c] = null;
+                                    }
+                                    p1.RemoveBulletAt(i);
+                                    break;
                                 }
-                                p1.RemoveBulletAt(i);
-                                break;
-                            }
-                    }
-            for (int i = bullets.Count - 1; i > -1; i--)
-                if (!bullets[i].Hitbox.Intersects(window))
-                    p1.RemoveBulletAt(i);
-            p1.Update(gameTime);
+                        }
+                for (int i = bullets.Count - 1; i > -1; i--)
+                    if (!bullets[i].Hitbox.Intersects(window))
+                        p1.RemoveBulletAt(i);
+                p1.Update(gameTime);
+            }else
+            {
+                // Qualans Code
+                // default to title screen
+            }
+            
 
             base.Update(gameTime);
         }
