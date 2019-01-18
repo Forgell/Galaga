@@ -97,7 +97,7 @@ namespace Galaga
             font1 = Content.Load<SpriteFont>("SpriteFont1");
             SpriteFont qFont = Content.Load<SpriteFont>("QualansFont");
             Texture2D bannderText = Content.Load<Texture2D>("banner");
-            titleScreen = new TitleScreen( bannderText, qFont , window.Width , window.Height);
+            titleScreen = new TitleScreen( bannderText, qFont , window.Width , window.Height, GraphicsDevice);
 
         }
 
@@ -153,7 +153,7 @@ namespace Galaga
                 // Qualans Code
                 // default to title screen
                 
-                isGameOn = titleScreen.update(Mouse.GetState().X, Mouse.GetState().Y, Mouse.GetState().LeftButton == ButtonState.Pressed);
+                isGameOn = titleScreen.update(Mouse.GetState().X, Mouse.GetState().Y, Mouse.GetState().LeftButton == ButtonState.Pressed, gameTime);
             }
             
 
@@ -182,7 +182,7 @@ namespace Galaga
             }else
             {
                 GraphicsDevice.Clear(Color.Black);
-                titleScreen.draw(spriteBatch);
+                titleScreen.draw(spriteBatch , gameTime);
             }
             
             // TODO: Add your drawing code here

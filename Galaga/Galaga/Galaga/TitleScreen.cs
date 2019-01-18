@@ -17,7 +17,8 @@ namespace Galaga
         Button leaderBoard;
         Texture2D textBanner;
         Rectangle rectBanner;
-        public TitleScreen(Texture2D textBanner ,SpriteFont font , int screenWidth , int screenHeight)
+        Stars field;
+        public TitleScreen(Texture2D textBanner ,SpriteFont font , int screenWidth , int screenHeight, GraphicsDevice graphics)
         {
 
             this.textBanner = textBanner;
@@ -29,18 +30,20 @@ namespace Galaga
             Console.WriteLine();
             start = new Button("start" , new Vector2(x , y) , font);
             leaderBoard = new Button("leaderBoard", new Vector2(x, y + screenHeight/15), font);
+            field = new Stars(graphics);
 
         }
 
-        public bool update(int x , int y, bool pressed)
+        public bool update(int x , int y, bool pressed , GameTime gameTime)
         {
-            
+            field.Update(gameTime);
             return start.preesed(x, y) && pressed;
         }
 
-        public void draw(SpriteBatch spriteBatch)
+        public void draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             spriteBatch.Begin();
+            field.Draw(gameTime , spriteBatch);
             spriteBatch.Draw(textBanner , rectBanner , Color.White);
             spriteBatch.End();
             start.Draw(spriteBatch);
