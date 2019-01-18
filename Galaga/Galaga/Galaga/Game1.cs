@@ -55,14 +55,6 @@ namespace Galaga
             tex = Content.Load<Texture2D>("GalagaSprites");
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
-            //Needs to be optimized - Nick
-            //using (var stream = TitleContainer.OpenStream("Level1.txt"))
-            //{
-            //    using (var reader = new StreamReader(stream))
-            //    {
-            //        lvl1Data = reader.ReadToEnd().Split(new string[] { "\r\n" }, StringSplitOptions.None);
-            //    }
-            //}
             lvl1Data = new string[] { "  3333", "22222222", "22222222", "11111111", "11111111" };
 
             enemies = new Enemy[lvl1Data.Length][];
