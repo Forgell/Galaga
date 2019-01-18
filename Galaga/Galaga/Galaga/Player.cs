@@ -91,7 +91,7 @@ namespace Galaga
             for (int i = 0; i < bullets.Count; i++)
                 bullets[i].Draw(spriteBatch, gameTime);
             for (int i = 0; i < lives; i++)
-                spriteBatch.Draw(tex, new Rectangle(i * 32, window.Height - 32, 32, 32), sheetRec, Color.White);
+                spriteBatch.Draw(tex, new Rectangle(i * 32 - 2, window.Height - 32, 32, 32), sheetRec, Color.White);
         }
     }
 }
