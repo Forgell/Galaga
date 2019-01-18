@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -58,22 +59,17 @@ namespace Galaga
 			Console.Write(GraphicsDevice.Viewport.Width + ", " + GraphicsDevice.Viewport.Height);
             tex = Content.Load<Texture2D>("GalagaSprites");
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-
             levelNum = 1;
             levelRecs = new Rectangle[] { new Rectangle(288, 192, 32, 32), new Rectangle(320, 192, 32, 32), new Rectangle(352, 192, 32, 32),
                 new Rectangle(288, 224, 32, 32), new Rectangle(320, 224, 32, 32), new Rectangle(352, 224, 32, 32) };
             levelValues = new int[] { 1, 5, 10, 20, 30, 50 };
-            //Needs to be optimized - Nick
-            //using (var stream = TitleContainer.OpenStream("Level1.txt"))
-            //{
-            //    using (var reader = new StreamReader(stream))
-            //    {
-            //        lvl1Data = reader.ReadToEnd().Split(new string[] { "\r\n" }, StringSplitOptions.None);
-            //    }
-            //}
-            lvl1Data = new string[] { "  3333", "22222222", "22222222", "11111111", "11111111" };
-
-            enemies = new Enemy[lvl1Data.Length][];
+            var lines = File.ReadAllLines("Level1.txt");
+			lvl1Data = new string[lines.Length];
+			for (int i = 0; i < lines.Length; i++)
+			{
+				lvl1Data[i] = lines[i];
+			}
+			enemies = new Enemy[lvl1Data.Length][];
             for (int r = 0; r < enemies.Length; r++)
             {
                 enemies[r] = new Enemy[lvl1Data[r].Length];
