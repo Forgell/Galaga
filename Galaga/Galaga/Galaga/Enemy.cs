@@ -17,6 +17,7 @@ namespace Galaga
         Rectangle hitbox, sheetRec;
         Vector2 origin;
         float angle;
+        List<Bullet> bullets;
         int timer, xV, lvl;
 
         public Enemy(Texture2D t, Rectangle rec, int level)
@@ -26,6 +27,7 @@ namespace Galaga
             sheetRec = new Rectangle((level + 1) * 32, 0, 32, 32);
             origin = new Vector2(sheetRec.Width / 2, sheetRec.Height / 2);
             angle = 0;
+            bullets = new List<Bullet>();
             timer = 0;
             xV = 2;
             lvl = level;
@@ -34,6 +36,11 @@ namespace Galaga
         public int Level
         {
             get { return lvl; }
+        }
+
+        public Rectangle Hitbox
+        {
+            get { return hitbox; }
         }
 
         public bool Intersects(Bullet bullet)

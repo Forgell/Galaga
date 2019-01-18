@@ -25,15 +25,16 @@ namespace Galaga
         Enemy[][] enemies;
         Player p1;
         int score;
+        SoundEffect explosion, playerExplosion;
+        List<Explosion> explosions;
         SpriteFont font1;
-        // Qualans Code
-        bool isGameOn;
-        TitleScreen titleScreen;
+        string centerText;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 288;
-            graphics.PreferredBackBufferHeight = 416;
+            graphics.PreferredBackBufferHeight = 448;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
@@ -75,12 +76,12 @@ namespace Galaga
                 }
             }
 
-            p1 = new Player(tex, new Rectangle(128, 384, 32, 32));
+            p1 = new Player(tex, new Rectangle(window.Width / 2 - 16, window.Height - 64, 32, 32), window);
             score = 0;
+            centerText = "";
 
-            // Qualans Code
-            isGameOn = false;
-            IsMouseVisible = true;
+            explosions = new List<Explosion>();
+
             base.Initialize();
         }
 
@@ -94,11 +95,9 @@ namespace Galaga
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            explosion = Content.Load<SoundEffect>("galaga_destroyed");
+            playerExplosion = Content.Load<SoundEffect>("fighter_destroyed");
             font1 = Content.Load<SpriteFont>("SpriteFont1");
-            SpriteFont qFont = Content.Load<SpriteFont>("QualansFont");
-            Texture2D bannderText = Content.Load<Texture2D>("banner");
-            titleScreen = new TitleScreen( bannderText, qFont , window.Width , window.Height, GraphicsDevice);
-
         }
 
         /// <summary>
@@ -122,40 +121,39 @@ namespace Galaga
                 this.Exit();
             field.Update(gameTime);
             // TODO: Add your update logic here
-            // Qualans code
-            if (isGameOn)
-            {
-                // other peaples code
-                List<Bullet> bullets = p1.Bullets;
-                for (int r = 0; r < enemies.Length; r++)
-                    for (int c = 0; c < enemies[r].Length; c++)
-                        if (enemies[r][c] != null)
-                        {
-                            enemies[r][c].Update(gameTime);
-                            for (int i = bullets.Count - 1; i > -1; i--)
-                                if (enemies[r][c].Intersects(bullets[i]))
+            List<Bullet> bullets = p1.Bullets;
+            for (int r = 0; r < enemies.Length; r++)
+                for (int c = 0; c < enemies[r].Length; c++)
+                    if (enemies[r][c] != null)
+                    {
+                        enemies[r][c].Update(gameTime);
+                        for (int i = bullets.Count - 1; i > -1; i--)
+                            if (enemies[r][c].Intersects(bullets[i]))
+                            {
+                                if (enemies[r][c].Level != 4)
                                 {
-                                    if (enemies[r][c].Level != 4)
-                                    {
-                                        score += enemies[r][c].Level * 50;
-                                        enemies[r][c] = null;
-                                    }
-                                    p1.RemoveBulletAt(i);
-                                    break;
+                                    score += enemies[r][c].Level * 50;
+                                    explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
+                                    enemies[r][c] = null;
                                 }
-                        }
-                for (int i = bullets.Count - 1; i > -1; i--)
-                    if (!bullets[i].Hitbox.Intersects(window))
-                        p1.RemoveBulletAt(i);
-                p1.Update(gameTime);
-            }else
+                                p1.RemoveBulletAt(i);
+                                break;
+                            }
+                    }
+            for (int i = bullets.Count - 1; i > -1; i--)
+                if (!bullets[i].Hitbox.Intersects(window))
+                    p1.RemoveBulletAt(i);
+            for (int i = explosions.Count - 1; i > -1 ; i--)
             {
-                // Qualans Code
-                // default to title screen
-                
-                isGameOn = titleScreen.update(Mouse.GetState().X, Mouse.GetState().Y, Mouse.GetState().LeftButton == ButtonState.Pressed, gameTime);
+                explosions[i].Update(gameTime);
+                if (explosions[i].Timer > 40)
+                    explosions.RemoveAt(i);
             }
-            
+            p1.Update(gameTime);
+            if (p1.Timer != 0)
+                centerText = "READY?";
+            else
+                centerText = "";
 
             base.Update(gameTime);
         }
@@ -166,25 +164,19 @@ namespace Galaga
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            
-            if (isGameOn)
-            {
-                GraphicsDevice.Clear(Color.CornflowerBlue);
-                spriteBatch.Begin();
-                field.Draw(gameTime, spriteBatch);
-                spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
-                for (int r = 0; r < enemies.Length; r++)
-                    for (int c = 0; c < enemies[r].Length; c++)
-                        if (enemies[r][c] != null)
-                            enemies[r][c].Draw(spriteBatch, gameTime);
-                p1.Draw(spriteBatch, gameTime);
-                spriteBatch.End();
-            }else
-            {
-                GraphicsDevice.Clear(Color.Black);
-                titleScreen.draw(spriteBatch , gameTime);
-            }
-            
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+            spriteBatch.Begin();
+            field.Draw(gameTime, spriteBatch);
+            spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
+            for (int r = 0; r < enemies.Length; r++)
+                for (int c = 0; c < enemies[r].Length; c++)
+                    if (enemies[r][c] != null)
+                        enemies[r][c].Draw(spriteBatch, gameTime);
+            p1.Draw(spriteBatch, gameTime);
+            for (int i = 0; i < explosions.Count; i++)
+                explosions[i].Draw(spriteBatch, gameTime);
+            spriteBatch.DrawString(font1, centerText, new Vector2(window.Width / 2 - 40, window.Height / 2 - 8), Color.Red);
+            spriteBatch.End();
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
