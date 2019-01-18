@@ -33,6 +33,9 @@ namespace Galaga
         Rectangle[] levelRecs;
         int[] levelValues;
 
+        // Qualans Code
+        TitleScreen titleScreen;
+        bool isGameOn;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -88,7 +91,8 @@ namespace Galaga
             centerText = "";
 
             explosions = new List<Explosion>();
-
+            isGameOn = false;
+            IsMouseVisible = true;
             base.Initialize();
         }
 
@@ -105,6 +109,9 @@ namespace Galaga
             explosion = Content.Load<SoundEffect>("galaga_destroyed");
             playerExplosion = Content.Load<SoundEffect>("fighter_destroyed");
             font1 = Content.Load<SpriteFont>("SpriteFont1");
+            Texture2D bannder = Content.Load<Texture2D>("banner");
+
+            titleScreen = new TitleScreen( bannder, Content.Load<SpriteFont>("qFont") , window.Width , window.Height , GraphicsDevice);
         }
 
         /// <summary>
@@ -128,39 +135,47 @@ namespace Galaga
                 this.Exit();
             field.Update(gameTime);
             // TODO: Add your update logic here
-            List<Bullet> bullets = p1.Bullets;
-            for (int r = 0; r < enemies.Length; r++)
-                for (int c = 0; c < enemies[r].Length; c++)
-                    if (enemies[r][c] != null)
-                    {
-                        enemies[r][c].Update(gameTime);
-                        for (int i = bullets.Count - 1; i > -1; i--)
-                            if (enemies[r][c].Intersects(bullets[i]))
-                            {
-                                if (enemies[r][c].Level != 4)
-                                {
-                                    score += enemies[r][c].Level * 50;
-                                    explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
-                                    enemies[r][c] = null;
-                                }
-                                p1.RemoveBulletAt(i);
-                                break;
-                            }
-                    }
-            for (int i = bullets.Count - 1; i > -1; i--)
-                if (!bullets[i].Hitbox.Intersects(window))
-                    p1.RemoveBulletAt(i);
-            for (int i = explosions.Count - 1; i > -1 ; i--)
+            if (isGameOn)
             {
-                explosions[i].Update(gameTime);
-                if (explosions[i].Timer > 40)
-                    explosions.RemoveAt(i);
+                List<Bullet> bullets = p1.Bullets;
+                for (int r = 0; r < enemies.Length; r++)
+                    for (int c = 0; c < enemies[r].Length; c++)
+                        if (enemies[r][c] != null)
+                        {
+                            enemies[r][c].Update(gameTime);
+                            for (int i = bullets.Count - 1; i > -1; i--)
+                                if (enemies[r][c].Intersects(bullets[i]))
+                                {
+                                    if (enemies[r][c].Level != 4)
+                                    {
+                                        score += enemies[r][c].Level * 50;
+                                        explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
+                                        enemies[r][c] = null;
+                                    }
+                                    p1.RemoveBulletAt(i);
+                                    break;
+                                }
+                        }
+                for (int i = bullets.Count - 1; i > -1; i--)
+                    if (!bullets[i].Hitbox.Intersects(window))
+                        p1.RemoveBulletAt(i);
+                for (int i = explosions.Count - 1; i > -1; i--)
+                {
+                    explosions[i].Update(gameTime);
+                    if (explosions[i].Timer > 40)
+                        explosions.RemoveAt(i);
+                }
+                p1.Update(gameTime);
+                if (p1.Timer != 0)
+                    centerText = "READY?";
+                else
+                    centerText = "";
             }
-            p1.Update(gameTime);
-            if (p1.Timer != 0)
-                centerText = "READY?";
             else
-                centerText = "";
+            {
+                isGameOn = titleScreen.update(Mouse.GetState().X , Mouse.GetState().Y ,Mouse.GetState().LeftButton == ButtonState.Pressed ,gameTime);
+            }
+            
 
             base.Update(gameTime);
         }
@@ -171,37 +186,45 @@ namespace Galaga
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-            spriteBatch.Begin();
-            field.Draw(gameTime, spriteBatch);
-            spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
-            for (int r = 0; r < enemies.Length; r++)
-                for (int c = 0; c < enemies[r].Length; c++)
-                    if (enemies[r][c] != null)
-                        enemies[r][c].Draw(spriteBatch, gameTime);
-            p1.Draw(spriteBatch, gameTime);
-            for (int i = 0; i < explosions.Count; i++)
-                explosions[i].Draw(spriteBatch, gameTime);
-            spriteBatch.DrawString(font1, centerText, new Vector2(window.Width / 2 - 40, window.Height / 2 - 8), Color.Red);
-            int levelNumCopy = levelNum;
-            int x = 0;
-            for (int i = levelRecs.Length - 1; i > -1; i--)
-                while (levelNumCopy >= levelValues[i])
-                {
-                    levelNumCopy -= levelValues[i];
-                    x++;
-                }
-            levelNumCopy = levelNum;
-            for (int i = levelRecs.Length - 1; i > -1; i--)
-                while (levelNumCopy >= levelValues[i])
-                {
-                    levelNumCopy -= levelValues[i];
-                    spriteBatch.Draw(tex, new Vector2(window.Width - x * 32, window.Height - 32), levelRecs[i], Color.White);
-                    x--;
-                }
-            spriteBatch.End();
-            // TODO: Add your drawing code here
-
+            
+            if (isGameOn)
+            {
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+                spriteBatch.Begin();
+                field.Draw(gameTime, spriteBatch);
+                spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
+                for (int r = 0; r < enemies.Length; r++)
+                    for (int c = 0; c < enemies[r].Length; c++)
+                        if (enemies[r][c] != null)
+                            enemies[r][c].Draw(spriteBatch, gameTime);
+                p1.Draw(spriteBatch, gameTime);
+                for (int i = 0; i < explosions.Count; i++)
+                    explosions[i].Draw(spriteBatch, gameTime);
+                spriteBatch.DrawString(font1, centerText, new Vector2(window.Width / 2 - 40, window.Height / 2 - 8), Color.Red);
+                int levelNumCopy = levelNum;
+                int x = 0;
+                for (int i = levelRecs.Length - 1; i > -1; i--)
+                    while (levelNumCopy >= levelValues[i])
+                    {
+                        levelNumCopy -= levelValues[i];
+                        x++;
+                    }
+                levelNumCopy = levelNum;
+                for (int i = levelRecs.Length - 1; i > -1; i--)
+                    while (levelNumCopy >= levelValues[i])
+                    {
+                        levelNumCopy -= levelValues[i];
+                        spriteBatch.Draw(tex, new Vector2(window.Width - x * 32, window.Height - 32), levelRecs[i], Color.White);
+                        x--;
+                    }
+                spriteBatch.End();
+                // TODO: Add your drawing code here
+            }
+            else
+            {
+                GraphicsDevice.Clear(Color.Black);
+                titleScreen.draw(spriteBatch , gameTime);
+            }
             base.Draw(gameTime);
         }
     }
