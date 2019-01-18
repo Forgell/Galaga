@@ -28,8 +28,8 @@ namespace Galaga
             Console.WriteLine();
             Console.WriteLine(rectBanner.Y );
             Console.WriteLine();
-            start = new Button("start" , new Vector2(x , y) , font);
-            leaderBoard = new Button("leaderBoard", new Vector2(x, y + screenHeight/15), font);
+            start = new Button("Start" , new Vector2(x , y) , font);
+            leaderBoard = new Button("LeaderBoard", new Vector2(x, y + screenHeight/15), font);
             field = new Stars(graphics);
 
         }
