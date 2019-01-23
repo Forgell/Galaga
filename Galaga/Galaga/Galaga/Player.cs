@@ -77,6 +77,10 @@ namespace Galaga
             }
             else
             {
+                if (timer == 1)
+                    hitbox.X = window.Width / 2 - (int)origin.X;
+                else
+                    hitbox.X = -64;
                 timer--;
                 if (kb.IsKeyDown(Keys.Space) && !oldKb.IsKeyDown(Keys.Space))
                     timer = 0;

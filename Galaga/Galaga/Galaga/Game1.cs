@@ -66,9 +66,7 @@ namespace Galaga
             var lines = File.ReadAllLines("Level1.txt");
 			lvl1Data = new string[lines.Length];
 			for (int i = 0; i < lines.Length; i++)
-			{
 				lvl1Data[i] = lines[i];
-			}
 			enemies = new Enemy[lvl1Data.Length][];
             for (int r = 0; r < enemies.Length; r++)
             {
@@ -139,6 +137,17 @@ namespace Galaga
                         if (enemies[r][c] != null)
                         {
                             enemies[r][c].Update(gameTime);
+                            if (enemies[r][c].Bullet != null)
+                            {
+                                if (p1.Hitbox.Intersects(enemies[r][c].Bullet.Hitbox))
+                                {
+                                    p1.RemoveLife();
+                                    explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
+                                    enemies[r][c].removeBullet();
+                                }
+                                else if (!enemies[r][c].Bullet.Hitbox.Intersects(window))
+                                    enemies[r][c].removeBullet();
+                            }
                             for (int i = bullets.Count - 1; i > -1; i--)
                                 if (enemies[r][c].Intersects(bullets[i]))
                                 {

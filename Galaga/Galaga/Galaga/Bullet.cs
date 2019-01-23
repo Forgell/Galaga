@@ -15,12 +15,25 @@ namespace Galaga
     {
         Texture2D tex;
         Rectangle hitbox, sheetRec;
+        bool enemy;
 
         public Bullet(Texture2D t, Rectangle rec)
         {
             tex = t;
             hitbox = rec;
             sheetRec = new Rectangle(0, 32, 8, 16);
+            enemy = false;
+        }
+
+        public Bullet(Texture2D t, Rectangle rec, bool enemyBullet)
+        {
+            tex = t;
+            hitbox = rec;
+            if (enemyBullet)
+                sheetRec = new Rectangle(32, 32, 8, 16);
+            else
+                sheetRec = new Rectangle(0, 32, 8, 16);
+            enemy = enemyBullet;
         }
 
         public Rectangle Hitbox
@@ -30,7 +43,10 @@ namespace Galaga
 
         public void Update(GameTime gameTime)
         {
-            hitbox.Y -= 6;
+            if (!enemy)
+                hitbox.Y -= 6;
+            else
+                hitbox.Y += 6;
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
