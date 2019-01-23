@@ -87,6 +87,7 @@ namespace Galaga
             explosions = new List<Explosion>();
             isGameOn = false;
             IsMouseVisible = true;
+            // test
             base.Initialize();
         }
 
