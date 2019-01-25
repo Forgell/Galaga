@@ -14,27 +14,29 @@ namespace Galaga
     class Enemy
     {
         Texture2D tex;
-        Rectangle hitbox, sheetRec;
-        Vector2 origin, pos, circleCenter;
+        Rectangle hitbox, sheetRec, window;
+        Vector2 origin, pos, fPos, velocity;
         float angle;
         Bullet bullet;
-        int timer, xV, lvl;
+        int timer, lvl, fXV;
         bool moving;
 
-        public Enemy(Texture2D t, Rectangle rec, int level)
+        public Enemy(Texture2D t, Vector2 finalPos, int level, Rectangle window)
         {
             tex = t;
-            hitbox = rec;
+            fPos = finalPos;
+            pos = new Vector2(-3200, 0);
+            hitbox = new Rectangle((int)pos.X, (int)pos.Y, 32, 32);
             sheetRec = new Rectangle((level + 1) * 32, 0, 32, 32);
             origin = new Vector2(sheetRec.Width / 2, sheetRec.Height / 2);
-            pos = new Vector2(hitbox.X, hitbox.Y);
-            circleCenter = new Vector2();
+            velocity = new Vector2();
             angle = 0;
             bullet = null;
             timer = 0;
-            xV = 2;
             lvl = level;
+            fXV = 1;
             moving = false;
+            this.window = window;
         }
 
         public int Level
@@ -78,27 +80,41 @@ namespace Galaga
             bullet = null;
         }
 
-        public void EnterScreen(int posNum)
+        public void EnterScreenAt(int posNum)
         {
             switch (posNum)
             {
+                case 0:
+                    pos = new Vector2(-32, 3 * window.Height / 4);
+                    break;
                 case 1:
+                    pos = new Vector2(-32, 2 * window.Height / 4);
                     break;
                 case 2:
+                    pos = new Vector2(-32, window.Height / 4);
                     break;
                 case 3:
+                    pos = new Vector2(-32, -32);
                     break;
                 case 4:
+                    pos = new Vector2(window.Width, -32);
                     break;
                 case 5:
+                    pos = new Vector2(window.Width, window.Height / 4);
                     break;
                 case 6:
+                    pos = new Vector2(window.Width, 2 * window.Height / 4);
                     break;
                 case 7:
-                    break;
-                case 8:
+                    pos = new Vector2(window.Width, 3 * window.Height / 4);
                     break;
             }
+            velocity = new Vector2(fPos.X - pos.X, fPos.Y - pos.Y);
+            velocity.Normalize();
+            if (posNum < 4)
+                angle = (float)(Math.Atan(velocity.Y / velocity.X) + Math.PI / 2);
+            else
+                angle = (float)(Math.Atan(velocity.Y / velocity.X) - Math.PI / 2);
         }
 
         public void Update(GameTime gameTime)
@@ -107,12 +123,24 @@ namespace Galaga
             if (timer == 0)
             {
                 sheetRec.Y = 0;
-                xV *= -1;
+                fXV *= -1;
             }
-            else if (timer == 16)
+            else if (timer == 16 )
                 sheetRec.Y = 32;
-            if (timer % 2 == 0)
-                hitbox.X += xV;
+            fPos.X += fXV;
+
+            if (!moving)
+            {
+                velocity = new Vector2(fPos.X - pos.X, fPos.Y - pos.Y);
+                if (Math.Abs(velocity.X) <= 2 && Math.Abs(velocity.Y) <= 2)
+                    angle = 0;
+                velocity.Normalize();
+            }
+
+            pos.X += velocity.X;
+            pos.Y += velocity.Y;
+            hitbox.X = (int)pos.X;
+            hitbox.Y = (int)pos.Y;
             if (bullet != null)
                 bullet.Update(gameTime);
             else if (moving && new Random().Next(300) == 1)

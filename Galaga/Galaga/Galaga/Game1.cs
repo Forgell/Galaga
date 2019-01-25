@@ -120,8 +120,12 @@ namespace Galaga
             {
                 if (timer != 0)
                 {
-                    timer--;
                     centerText = "LEVEL " + levelNum;
+                    if (timer % 30 == 0)
+                        for (int c = 0; c < enemies[timer/ 30 - 1].Length; c++)
+                            if (enemies[timer / 30 - 1][c] != null)
+                                enemies[timer / 30 - 1][c].EnterScreenAt(c);
+                    timer--;
                 }
                 List<Bullet> bullets = p1.Bullets;
                 for (int r = 0; r < enemies.Length; r++)
@@ -145,7 +149,7 @@ namespace Galaga
                                 {
                                     if (enemies[r][c].Level != 4)
                                     {
-                                        score += enemies[r][c].Level * 50;
+                                        score += enemies[r][c].Level * 50 + (levelNum - 1) * 5;
                                         explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
                                         enemies[r][c] = null;
                                     }
@@ -192,7 +196,7 @@ namespace Galaga
             
             if (isGameOn)
             {
-                GraphicsDevice.Clear(Color.CornflowerBlue);
+                GraphicsDevice.Clear(Color.Black);
                 spriteBatch.Begin();
                 field.Draw(gameTime, spriteBatch);
                 spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
@@ -233,7 +237,7 @@ namespace Galaga
 
         public void ReadLevelData()
         {
-            timer = 180;
+            timer = 150;
             var lines = File.ReadAllLines("Level" + levelNum % 5 + ".txt");
             lvlData = new string[lines.Length];
             for (int i = 0; i < lines.Length; i++)
@@ -247,7 +251,7 @@ namespace Galaga
                     if (lvlData[r].Substring(c, 1).Equals(" "))
                         enemies[r][c] = null;
                     else
-                        enemies[r][c] = new Enemy(tex, new Rectangle(c * 32 + 32, (r + 1) * 32, 32, 32), int.Parse(lvlData[r].Substring(c, 1)));
+                        enemies[r][c] = new Enemy(tex, new Vector2(c * 32 + 32, (r + 1) * 32), int.Parse(lvlData[r].Substring(c, 1)), window);
                 }
             }
         }
