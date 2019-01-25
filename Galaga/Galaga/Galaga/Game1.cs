@@ -26,7 +26,7 @@ namespace Galaga
         Enemy[][] enemies;
         Player p1;
         int score, timer, extraLifeScore;
-        SoundEffect explosion, playerExplosion;
+        SoundEffect explosion, bossDamaged, playerExplosion, laser, extraShip;
         List<Explosion> explosions;
         SpriteFont font1;
         string centerText;
@@ -70,7 +70,8 @@ namespace Galaga
             levelValues = new int[] { 1, 5, 10, 20, 30, 50 };
             ReadLevelData();
 
-            p1 = new Player(tex, new Rectangle(window.Width / 2 - 16, window.Height - 96, 32, 32), window);
+            laser = Content.Load<SoundEffect>("laser_default");
+            p1 = new Player(tex, new Rectangle(window.Width / 2 - 16, window.Height - 96, 32, 32), laser, window);
             score = 0;
             extraLifeScore = 10000;
             centerText = "";
@@ -96,7 +97,9 @@ namespace Galaga
 
             // TODO: use this.Content to load your game content here
             explosion = Content.Load<SoundEffect>("galaga_destroyed");
+            bossDamaged = Content.Load<SoundEffect>("bossgalaga_injured");
             playerExplosion = Content.Load<SoundEffect>("fighter_destroyed");
+            extraShip = Content.Load<SoundEffect>("extra_ship");
             font1 = Content.Load<SpriteFont>("SpriteFont1");
             Texture2D bannder = Content.Load<Texture2D>("banner");
 
@@ -175,6 +178,8 @@ namespace Galaga
                                         explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
                                         enemies[r][c] = null;
                                     }
+                                    else
+                                        bossDamaged.Play();
                                     p1.RemoveBulletAt(i);
                                     break;
                                 }
@@ -221,6 +226,7 @@ namespace Galaga
                 if (score >= extraLifeScore)
                 {
                     p1.AddLife();
+                    extraShip.Play();
                     extraLifeScore += 10000;
                 }
 

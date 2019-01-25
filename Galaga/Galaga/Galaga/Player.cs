@@ -19,9 +19,10 @@ namespace Galaga
         float angle;
         List<Bullet> bullets;
         int lives, timer, invTimer;
+        SoundEffect laser;
         KeyboardState oldKb;
 
-        public Player(Texture2D t, Rectangle rec, Rectangle window)
+        public Player(Texture2D t, Rectangle rec, SoundEffect laser,  Rectangle window)
         {
             tex = t;
             hitbox = rec;
@@ -32,6 +33,7 @@ namespace Galaga
             lives = 2;
             timer = 0;
             invTimer = 0;
+            this.laser = laser;
             oldKb = Keyboard.GetState();
             this.window = window;
         }
@@ -87,7 +89,10 @@ namespace Galaga
                 if (kb.IsKeyDown(Keys.Left) && hitbox.X >= 0)
                     hitbox.X -= 2;
                 if (kb.IsKeyDown(Keys.Space) && !oldKb.IsKeyDown(Keys.Space) && bullets.Count < 2)
+                {
                     bullets.Add(new Bullet(tex, new Rectangle(hitbox.X + 12, hitbox.Y - 16, 8, 16)));
+                    laser.Play();
+                }
                 if (invTimer > 0)
                     invTimer--;
             }
