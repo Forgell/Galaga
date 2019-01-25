@@ -50,6 +50,11 @@ namespace Galaga
             get { return timer; }
         }
 
+        public int Lives
+        {
+            get { return lives; }
+        }
+
         public void RemoveBulletAt(int index)
         {
             bullets.RemoveAt(index);
@@ -59,6 +64,11 @@ namespace Galaga
         {
             lives--;
             timer = 300;
+        }
+
+        public void AddLife()
+        {
+            lives++;
         }
 
         public void Update(GameTime gameTime)
@@ -80,10 +90,13 @@ namespace Galaga
                 if (timer == 1)
                     hitbox.X = window.Width / 2 - (int)origin.X;
                 else
-                    hitbox.X = -64;
+                    hitbox.X = -96;
                 timer--;
                 if (kb.IsKeyDown(Keys.Space) && !oldKb.IsKeyDown(Keys.Space))
+                {
                     timer = 0;
+                    hitbox.X = window.Width / 2 - (int)origin.X;
+                }
             }
             oldKb = kb;
         }

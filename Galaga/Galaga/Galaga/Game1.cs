@@ -25,7 +25,7 @@ namespace Galaga
         string[] lvlData;
         Enemy[][] enemies;
         Player p1;
-        int score, timer;
+        int score, timer, extraLifeScore;
         SoundEffect explosion, playerExplosion;
         List<Explosion> explosions;
         SpriteFont font1;
@@ -33,6 +33,9 @@ namespace Galaga
         int levelNum;
         Rectangle[] levelRecs;
         int[] levelValues;
+        Random ran;
+        bool gameOver;
+        Button replay;
 
         // Qualans Code
         TitleScreen titleScreen;
@@ -60,6 +63,7 @@ namespace Galaga
 			Console.Write(GraphicsDevice.Viewport.Width + ", " + GraphicsDevice.Viewport.Height);
             tex = Content.Load<Texture2D>("GalagaSprites");
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            ran = new Random();
             levelNum = 1;
             levelRecs = new Rectangle[] { new Rectangle(288, 192, 32, 32), new Rectangle(320, 192, 32, 32), new Rectangle(352, 192, 32, 32),
                 new Rectangle(288, 224, 32, 32), new Rectangle(320, 224, 32, 32), new Rectangle(352, 224, 32, 32) };
@@ -68,7 +72,11 @@ namespace Galaga
 
             p1 = new Player(tex, new Rectangle(window.Width / 2 - 16, window.Height - 96, 32, 32), window);
             score = 0;
+            extraLifeScore = 10000;
             centerText = "";
+
+            gameOver = false;
+            replay = null;
 
             explosions = new List<Explosion>();
             isGameOn = false;
@@ -144,6 +152,14 @@ namespace Galaga
                                 else if (!enemies[r][c].Bullet.Hitbox.Intersects(window))
                                     enemies[r][c].RemoveBullet();
                             }
+                            if (p1.Hitbox.Intersects(enemies[r][c].Hitbox))
+                            {
+                                explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
+                                enemies[r][c] = null;
+                                p1.RemoveLife();
+                                explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
+                                break;
+                            }
                             for (int i = bullets.Count - 1; i > -1; i--)
                                 if (enemies[r][c].Intersects(bullets[i]))
                                 {
@@ -160,17 +176,45 @@ namespace Galaga
                 for (int i = bullets.Count - 1; i > -1; i--)
                     if (!bullets[i].Hitbox.Intersects(window))
                         p1.RemoveBulletAt(i);
+                if (ran.Next(300) < levelNum)
+                {
+                    int r = ran.Next(enemies.Length);
+                    int c = ran.Next(enemies[r].Length);
+                    if (enemies[r][c] != null)
+                        enemies[r][c].Move();
+                }
                 for (int i = explosions.Count - 1; i > -1; i--)
                 {
                     explosions[i].Update(gameTime);
                     if (explosions[i].Timer > 40)
                         explosions.RemoveAt(i);
                 }
-                p1.Update(gameTime);
-                if (p1.Timer != 0)
-                    centerText = "READY?";
-                else if (timer == 0)
-                    centerText = "";
+                if (!gameOver)
+                {
+                    p1.Update(gameTime);
+                    if (p1.Timer != 0)
+                        centerText = "READY?";
+                    else if (timer == 0)
+                        centerText = "";
+                    if (p1.Lives < 0)
+                    {
+                        gameOver = true;
+                        replay = new Button("Main Menu", new Vector2(window.Width / 2 - 60, window.Height / 2 + 64), font1);
+                    }
+                }
+                else
+                {
+                    centerText = " GAME\n OVER";
+                    if (replay.preesed(Mouse.GetState().X, Mouse.GetState().Y) && Mouse.GetState().LeftButton == ButtonState.Pressed)
+                    {
+                        Initialize();
+                    }
+                }
+                if (score >= extraLifeScore)
+                {
+                    p1.AddLife();
+                    extraLifeScore += 10000;
+                }
 
                 if (LevelOver())
                 {
@@ -180,7 +224,7 @@ namespace Galaga
             }
             else
             {
-                isGameOn = titleScreen.update(Mouse.GetState().X , Mouse.GetState().Y ,Mouse.GetState().LeftButton == ButtonState.Pressed ,gameTime);
+                isGameOn = titleScreen.update(Mouse.GetState().X, Mouse.GetState().Y, Mouse.GetState().LeftButton == ButtonState.Pressed, gameTime);
             }
             
 
@@ -208,6 +252,8 @@ namespace Galaga
                 for (int i = 0; i < explosions.Count; i++)
                     explosions[i].Draw(spriteBatch, gameTime);
                 spriteBatch.DrawString(font1, centerText, new Vector2(window.Width / 2 - 40, window.Height / 2 - 8), Color.Red);
+                if (replay != null)
+                    replay.Draw(spriteBatch);
                 int levelNumCopy = levelNum;
                 int x = 0;
                 for (int i = levelRecs.Length - 1; i > -1; i--)

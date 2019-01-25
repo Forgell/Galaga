@@ -111,10 +111,28 @@ namespace Galaga
             }
             velocity = new Vector2(fPos.X - pos.X, fPos.Y - pos.Y);
             velocity.Normalize();
-            if (posNum < 4)
-                angle = (float)(Math.Atan(velocity.Y / velocity.X) + Math.PI / 2);
+            FindAngle();
+        }
+
+        public void Move()
+        {
+            moving = true;
+            velocity = new Vector2((float)new Random().NextDouble() * 3 - 1.5f, 2);
+            FindAngle();
+        }
+
+        private void FindAngle()
+        {
+            if (velocity.X == 0)
+                angle = (float)Math.PI;
             else
-                angle = (float)(Math.Atan(velocity.Y / velocity.X) - Math.PI / 2);
+            {
+                angle = (float)Math.Atan(velocity.Y / velocity.X);
+                if (velocity.X > 0)
+                    angle += (float)Math.PI / 2;
+                else
+                    angle -= (float)Math.PI / 2;
+            }
         }
 
         public void Update(GameTime gameTime)
@@ -136,6 +154,15 @@ namespace Galaga
                     angle = 0;
                 velocity.Normalize();
             }
+            else if (moving && !hitbox.Intersects(window))
+            {
+                pos.X = new Random().Next(window.Width);
+                pos.Y = -64;
+                moving = false;
+                velocity = new Vector2(fPos.X - pos.X, fPos.Y - pos.Y);
+                velocity.Normalize();
+                FindAngle();
+            }
 
             pos.X += velocity.X;
             pos.Y += velocity.Y;
@@ -143,7 +170,7 @@ namespace Galaga
             hitbox.Y = (int)pos.Y;
             if (bullet != null)
                 bullet.Update(gameTime);
-            else if (moving && new Random().Next(300) == 1)
+            else if (moving && new Random().Next(150) == 1)
                 bullet = new Bullet(tex, new Rectangle(hitbox.X + 12, hitbox.Y + 32, 8, 16), true);
         }
 
