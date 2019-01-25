@@ -128,7 +128,7 @@ namespace Galaga
                     for (int c = 0; c < enemies[r].Length; c++)
                         if (enemies[r][c] != null)
                         {
-                            enemies[r][c].Update(gameTime);
+                            enemies[r][c].Update(gameTime, levelNum);
                             if (enemies[r][c].Bullet != null)
                             {
                                 if (p1.Hitbox.Intersects(enemies[r][c].Bullet.Hitbox))
