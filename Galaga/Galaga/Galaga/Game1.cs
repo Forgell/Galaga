@@ -206,6 +206,8 @@ namespace Galaga
                     {
                         gameOver = true;
                         replay = new Button("Main Menu", new Vector2(window.Width / 2 - 60, window.Height / 2 + 64), font1);
+                        for (int i = p1.Bullets.Count - 1; i > -1; i--)
+                            p1.RemoveBulletAt(i);
                     }
                 }
                 else

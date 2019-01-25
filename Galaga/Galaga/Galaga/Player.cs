@@ -70,8 +70,6 @@ namespace Galaga
         {
             lives--;
             timer = 300;
-            for (int i = 0; i < bullets.Count; i++)
-                bullets.RemoveAt(i);
         }
 
         public void AddLife()
@@ -90,8 +88,6 @@ namespace Galaga
                     hitbox.X -= 2;
                 if (kb.IsKeyDown(Keys.Space) && !oldKb.IsKeyDown(Keys.Space) && bullets.Count < 2)
                     bullets.Add(new Bullet(tex, new Rectangle(hitbox.X + 12, hitbox.Y - 16, 8, 16)));
-                for (int i = 0; i < bullets.Count; i++)
-                    bullets[i].Update(gameTime);
                 if (invTimer > 0)
                     invTimer--;
             }
@@ -110,6 +106,8 @@ namespace Galaga
                     timer = 1;
                 }
             }
+            for (int i = 0; i < bullets.Count; i++)
+                bullets[i].Update(gameTime);
             oldKb = kb;
         }
 

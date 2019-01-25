@@ -170,7 +170,7 @@ namespace Galaga
             hitbox.Y = (int)pos.Y;
             if (bullet != null)
                 bullet.Update(gameTime);
-            else if (moving && new Random().Next(150) == 1)
+            else if (moving && new Random().Next(300 / lvl) == 1)
                 bullet = new Bullet(tex, new Rectangle(hitbox.X + 12, hitbox.Y + 32, 8, 16), true);
         }
 
