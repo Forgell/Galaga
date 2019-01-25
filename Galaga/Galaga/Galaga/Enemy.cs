@@ -16,14 +16,10 @@ namespace Galaga
         Texture2D tex;
         Rectangle hitbox, sheetRec;
         Vector2 origin, pos, circleCenter;
-		static Random r = new Random();
         float angle;
         Bullet bullet;
         int timer, xV, lvl;
         bool moving;
-		int gotoX;
-		int gotoY;
-		int xVMov, yVMov;
 
         public Enemy(Texture2D t, Rectangle rec, int level)
         {
@@ -38,7 +34,7 @@ namespace Galaga
             timer = 0;
             xV = 2;
             lvl = level;
-            moving = true;
+            moving = false;
         }
 
         public int Level
@@ -105,7 +101,7 @@ namespace Galaga
             }
         }
 
-        public void Update(GameTime gameTime, int diff)
+        public void Update(GameTime gameTime)
         {
             timer = (timer + 1) % 32;
             if (timer == 0)
@@ -119,9 +115,8 @@ namespace Galaga
                 hitbox.X += xV;
             if (bullet != null)
                 bullet.Update(gameTime);
-			// else if (moving && new Random((int)Math.Pow(Environment.TickCount * i + x, x) + x * Environment.TickCount).Next(3500  / ((int)Math.Ceiling(diff / 5.0) + 1)) == 1)
-			else if (moving && r.Next(3500 / ((int)Math.Ceiling(diff / 5.0) + 1)) == 1)
-				bullet = new Bullet(tex, new Rectangle(hitbox.X + 12, hitbox.Y + 32, 8, 16), true);
+            else if (moving && new Random().Next(300) == 1)
+                bullet = new Bullet(tex, new Rectangle(hitbox.X + 12, hitbox.Y + 32, 8, 16), true);
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
@@ -130,13 +125,5 @@ namespace Galaga
             if (bullet != null)
                 bullet.Draw(spriteBatch, gameTime);
         }
-		//public void move(GraphicsDevice graphics)
-		//{
-		//	Random r = new Random();
-		//	gotoY = r.Next(0, graphics.Viewport.Height - 20);
-		//	gotoX = r.Next(0, graphics.Viewport.Width);
-		//	xVMov = (hitbox.X / 5);
-
-		//}
     }
 }
