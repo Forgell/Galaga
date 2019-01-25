@@ -106,7 +106,7 @@ namespace Galaga
                 else
                     hitbox.X = -96;
                 timer--;
-                if (kb.IsKeyDown(Keys.Space) && !oldKb.IsKeyDown(Keys.Space))
+                if (kb.IsKeyDown(Keys.Space) && !oldKb.IsKeyDown(Keys.Space) && timer < 240)
                 {
                     timer = 1;
                 }
