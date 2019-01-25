@@ -145,8 +145,11 @@ namespace Galaga
                             {
                                 if (p1.Hitbox.Intersects(enemies[r][c].Bullet.Hitbox))
                                 {
-                                    p1.RemoveLife();
-                                    explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
+                                    if (!p1.IsInvincible)
+                                    {
+                                        p1.RemoveLife();
+                                        explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
+                                    }
                                     enemies[r][c].RemoveBullet();
                                 }
                                 else if (!enemies[r][c].Bullet.Hitbox.Intersects(window))
@@ -156,8 +159,11 @@ namespace Galaga
                             {
                                 explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
                                 enemies[r][c] = null;
-                                p1.RemoveLife();
-                                explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
+                                if (!p1.IsInvincible)
+                                {
+                                    p1.RemoveLife();
+                                    explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
+                                }
                                 break;
                             }
                             for (int i = bullets.Count - 1; i > -1; i--)
@@ -176,7 +182,7 @@ namespace Galaga
                 for (int i = bullets.Count - 1; i > -1; i--)
                     if (!bullets[i].Hitbox.Intersects(window))
                         p1.RemoveBulletAt(i);
-                if (ran.Next(300) < levelNum)
+                if (ran.Next(150) < levelNum)
                 {
                     int r = ran.Next(enemies.Length);
                     int c = ran.Next(enemies[r].Length);
