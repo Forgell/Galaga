@@ -22,10 +22,10 @@ namespace Galaga
         Stars field;
         Texture2D tex;
         Rectangle window;
-        string[] lvl1Data;
+        string[] lvlData;
         Enemy[][] enemies;
         Player p1;
-        int score;
+        int score, timer;
         SoundEffect explosion, playerExplosion;
         List<Explosion> explosions;
         SpriteFont font1;
@@ -37,6 +37,7 @@ namespace Galaga
         // Qualans Code
         TitleScreen titleScreen;
         bool isGameOn;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -63,22 +64,7 @@ namespace Galaga
             levelRecs = new Rectangle[] { new Rectangle(288, 192, 32, 32), new Rectangle(320, 192, 32, 32), new Rectangle(352, 192, 32, 32),
                 new Rectangle(288, 224, 32, 32), new Rectangle(320, 224, 32, 32), new Rectangle(352, 224, 32, 32) };
             levelValues = new int[] { 1, 5, 10, 20, 30, 50 };
-            var lines = File.ReadAllLines("Level1.txt");
-			lvl1Data = new string[lines.Length];
-			for (int i = 0; i < lines.Length; i++)
-				lvl1Data[i] = lines[i];
-			enemies = new Enemy[lvl1Data.Length][];
-            for (int r = 0; r < enemies.Length; r++)
-            {
-                enemies[r] = new Enemy[lvl1Data[r].Length];
-                for (int c = 0; c < enemies[r].Length; c++)
-                {
-                    if (lvl1Data[r].Substring(c, 1).Equals(" "))
-                        enemies[r][c] = null;
-                    else
-                        enemies[r][c] = new Enemy(tex, new Rectangle(c * 32 + 32, (r + 1) * 32, 32, 32), int.Parse(lvl1Data[r].Substring(c, 1)));
-                }
-            }
+            ReadLevelData();
 
             p1 = new Player(tex, new Rectangle(window.Width / 2 - 16, window.Height - 96, 32, 32), window);
             score = 0;
@@ -106,7 +92,7 @@ namespace Galaga
             font1 = Content.Load<SpriteFont>("SpriteFont1");
             Texture2D bannder = Content.Load<Texture2D>("banner");
 
-            titleScreen = new TitleScreen( bannder, Content.Load<SpriteFont>("qFont") , window.Width , window.Height , GraphicsDevice);
+            titleScreen = new TitleScreen( bannder, font1 , window.Width , window.Height , GraphicsDevice);
         }
 
         /// <summary>
@@ -132,6 +118,11 @@ namespace Galaga
             // TODO: Add your update logic here
             if (isGameOn)
             {
+                if (timer != 0)
+                {
+                    timer--;
+                    centerText = "LEVEL " + levelNum;
+                }
                 List<Bullet> bullets = p1.Bullets;
                 for (int r = 0; r < enemies.Length; r++)
                     for (int c = 0; c < enemies[r].Length; c++)
@@ -144,10 +135,10 @@ namespace Galaga
                                 {
                                     p1.RemoveLife();
                                     explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
-                                    enemies[r][c].removeBullet();
+                                    enemies[r][c].RemoveBullet();
                                 }
                                 else if (!enemies[r][c].Bullet.Hitbox.Intersects(window))
-                                    enemies[r][c].removeBullet();
+                                    enemies[r][c].RemoveBullet();
                             }
                             for (int i = bullets.Count - 1; i > -1; i--)
                                 if (enemies[r][c].Intersects(bullets[i]))
@@ -174,8 +165,14 @@ namespace Galaga
                 p1.Update(gameTime);
                 if (p1.Timer != 0)
                     centerText = "READY?";
-                else
+                else if (timer == 0)
                     centerText = "";
+
+                if (LevelOver())
+                {
+                    levelNum++;
+                    ReadLevelData();
+                }
             }
             else
             {
@@ -232,6 +229,36 @@ namespace Galaga
                 titleScreen.draw(spriteBatch , gameTime);
             }
             base.Draw(gameTime);
+        }
+
+        public void ReadLevelData()
+        {
+            timer = 180;
+            var lines = File.ReadAllLines("Level" + levelNum % 5 + ".txt");
+            lvlData = new string[lines.Length];
+            for (int i = 0; i < lines.Length; i++)
+                lvlData[i] = lines[i];
+            enemies = new Enemy[lvlData.Length][];
+            for (int r = 0; r < enemies.Length; r++)
+            {
+                enemies[r] = new Enemy[lvlData[r].Length];
+                for (int c = 0; c < enemies[r].Length; c++)
+                {
+                    if (lvlData[r].Substring(c, 1).Equals(" "))
+                        enemies[r][c] = null;
+                    else
+                        enemies[r][c] = new Enemy(tex, new Rectangle(c * 32 + 32, (r + 1) * 32, 32, 32), int.Parse(lvlData[r].Substring(c, 1)));
+                }
+            }
+        }
+
+        public bool LevelOver()
+        {
+            for (int r = 0; r < enemies.Length; r++)
+                for (int c = 0; c < enemies[r].Length; c++)
+                    if (enemies[r][c] != null)
+                        return false;
+            return true;
         }
     }
 }
