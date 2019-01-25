@@ -18,7 +18,7 @@ namespace Galaga
         Vector2 origin;
         float angle;
         List<Bullet> bullets;
-        int lives, timer;
+        int lives, timer, invTimer;
         KeyboardState oldKb;
 
         public Player(Texture2D t, Rectangle rec, Rectangle window)
@@ -31,6 +31,7 @@ namespace Galaga
             bullets = new List<Bullet>();
             lives = 2;
             timer = 0;
+            invTimer = 0;
             oldKb = Keyboard.GetState();
             this.window = window;
         }
@@ -50,6 +51,16 @@ namespace Galaga
             get { return timer; }
         }
 
+        public int Lives
+        {
+            get { return lives; }
+        }
+
+        public bool IsInvincible
+        {
+            get { return invTimer > 0; }
+        }
+
         public void RemoveBulletAt(int index)
         {
             bullets.RemoveAt(index);
@@ -59,6 +70,13 @@ namespace Galaga
         {
             lives--;
             timer = 300;
+            for (int i = 0; i < bullets.Count; i++)
+                bullets.RemoveAt(i);
+        }
+
+        public void AddLife()
+        {
+            lives++;
         }
 
         public void Update(GameTime gameTime)
@@ -74,23 +92,30 @@ namespace Galaga
                     bullets.Add(new Bullet(tex, new Rectangle(hitbox.X + 12, hitbox.Y - 16, 8, 16)));
                 for (int i = 0; i < bullets.Count; i++)
                     bullets[i].Update(gameTime);
+                if (invTimer > 0)
+                    invTimer--;
             }
             else
             {
                 if (timer == 1)
+                {
                     hitbox.X = window.Width / 2 - (int)origin.X;
+                    invTimer = 120;
+                }
                 else
-                    hitbox.X = -64;
+                    hitbox.X = -96;
                 timer--;
                 if (kb.IsKeyDown(Keys.Space) && !oldKb.IsKeyDown(Keys.Space))
-                    timer = 0;
+                {
+                    timer = 1;
+                }
             }
             oldKb = kb;
         }
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            if (timer == 0)
+            if (timer == 0 && invTimer / 4 % 2 == 0)
                 spriteBatch.Draw(tex, new Vector2(hitbox.X + origin.X, hitbox.Y + origin.Y), sheetRec, Color.White, angle, origin, 1, SpriteEffects.None, 0);
             for (int i = 0; i < bullets.Count; i++)
                 bullets[i].Draw(spriteBatch, gameTime);

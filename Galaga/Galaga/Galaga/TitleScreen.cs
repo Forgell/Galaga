@@ -45,12 +45,13 @@ namespace Galaga
             spriteBatch.Begin();
             field.Draw(gameTime , spriteBatch);
             spriteBatch.Draw(textBanner , rectBanner , Color.White);
-            spriteBatch.End();
             start.Draw(spriteBatch);
             leaderBoard.Draw(spriteBatch);
+            spriteBatch.End();
         }
     }
-    class Button{
+    class Button
+    {
         string text;
         Texture2D image;
         Rectangle rect;
@@ -60,6 +61,7 @@ namespace Galaga
         int width, height;
         Rectangle temp;
         Rectangle temp2;
+
         public Button(string text, Vector2 pos , SpriteFont font)
         {
             Vector2 dems = font.MeasureString(text);
@@ -105,7 +107,6 @@ namespace Galaga
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Begin();
             if (isImage)
             {
                 spriteBatch.Draw(image,  rect, Color.White);
@@ -113,8 +114,6 @@ namespace Galaga
             {
                 spriteBatch.DrawString(font , text , pos , Color.White);
             }
-            
-            spriteBatch.End();
         }
     }
 }
