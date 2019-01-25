@@ -14,7 +14,7 @@ namespace Galaga
     class TitleScreen
     {
         Button start;
-        Button leaderBoard;
+        //Button leaderBoard;
         Texture2D textBanner;
         Rectangle rectBanner;
         Stars field;
@@ -29,7 +29,7 @@ namespace Galaga
             Console.WriteLine(rectBanner.Y );
             Console.WriteLine();
             start = new Button("Start" , new Vector2(x , y) , font);
-            leaderBoard = new Button("LeaderBoard", new Vector2(x, y + screenHeight/15), font);
+            //leaderBoard = new Button("LeaderBoard", new Vector2(x, y + screenHeight/15), font);
             field = new Stars(graphics);
 
         }
@@ -46,7 +46,7 @@ namespace Galaga
             field.Draw(gameTime , spriteBatch);
             spriteBatch.Draw(textBanner , rectBanner , Color.White);
             start.Draw(spriteBatch);
-            leaderBoard.Draw(spriteBatch);
+            //leaderBoard.Draw(spriteBatch);
             spriteBatch.End();
         }
     }
