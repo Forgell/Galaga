@@ -25,7 +25,7 @@ namespace Galaga
         {
             tex = t;
             fPos = finalPos;
-            pos = new Vector2(-3200, 0);
+            pos = new Vector2(-64, -128);
             hitbox = new Rectangle((int)pos.X, (int)pos.Y, 32, 32);
             sheetRec = new Rectangle((level + 1) * 32, 0, 32, 32);
             origin = new Vector2(sheetRec.Width / 2, sheetRec.Height / 2);
@@ -164,10 +164,13 @@ namespace Galaga
                 FindAngle();
             }
 
-            pos.X += velocity.X;
-            pos.Y += velocity.Y;
-            hitbox.X = (int)pos.X;
-            hitbox.Y = (int)pos.Y;
+            if (pos.Y >= -64)
+            {
+                pos.X += velocity.X;
+                pos.Y += velocity.Y;
+                hitbox.X = (int)pos.X;
+                hitbox.Y = (int)pos.Y;
+            }
             if (bullet != null)
                 bullet.Update(gameTime);
             else if (moving && new Random().Next(300 / lvl) == 1)
