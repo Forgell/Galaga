@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -21,16 +22,30 @@ namespace Galaga
         Stars field;
         Texture2D tex;
         Rectangle window;
-        string[] lvl1Data;
+        string[] lvlData;
         Enemy[][] enemies;
         Player p1;
-        int score;
+        int score, timer, extraLifeScore;
+        SoundEffect explosion, bossDamaged, playerExplosion, laser, extraShip;
+        List<Explosion> explosions;
         SpriteFont font1;
+        string centerText;
+        int levelNum;
+        Rectangle[] levelRecs;
+        int[] levelValues;
+        Random ran;
+        bool gameOver;
+        Button replay;
+
+        // Qualans Code
+        TitleScreen titleScreen;
+        bool isGameOn;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 288;
-            graphics.PreferredBackBufferHeight = 416;
+            graphics.PreferredBackBufferWidth = 352;
+            graphics.PreferredBackBufferHeight = 480;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
@@ -48,32 +63,26 @@ namespace Galaga
 			Console.Write(GraphicsDevice.Viewport.Width + ", " + GraphicsDevice.Viewport.Height);
             tex = Content.Load<Texture2D>("GalagaSprites");
             window = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            ran = new Random();
+            levelNum = 1;
+            levelRecs = new Rectangle[] { new Rectangle(288, 192, 32, 32), new Rectangle(320, 192, 32, 32), new Rectangle(352, 192, 32, 32),
+                new Rectangle(288, 224, 32, 32), new Rectangle(320, 224, 32, 32), new Rectangle(352, 224, 32, 32) };
+            levelValues = new int[] { 1, 5, 10, 20, 30, 50 };
+            ReadLevelData();
 
-            //Needs to be optimized - Nick
-            //using (var stream = TitleContainer.OpenStream("Level1.txt"))
-            //{
-            //    using (var reader = new StreamReader(stream))
-            //    {
-            //        lvl1Data = reader.ReadToEnd().Split(new string[] { "\r\n" }, StringSplitOptions.None);
-            //    }
-            //}
-            lvl1Data = new string[] { "  3333", "22222222", "22222222", "11111111", "11111111" };
-
-            enemies = new Enemy[lvl1Data.Length][];
-            for (int r = 0; r < enemies.Length; r++)
-            {
-                enemies[r] = new Enemy[lvl1Data[r].Length];
-                for (int c = 0; c < enemies[r].Length; c++)
-                {
-                    if (lvl1Data[r].Substring(c, 1).Equals(" "))
-                        enemies[r][c] = null;
-                    else
-                        enemies[r][c] = new Enemy(tex, new Rectangle(c * 32, (r + 1) * 32, 32, 32), int.Parse(lvl1Data[r].Substring(c, 1)));
-                }
-            }
-
-            p1 = new Player(tex, new Rectangle(128, 384, 32, 32));
+            laser = Content.Load<SoundEffect>("laser_default");
+            p1 = new Player(tex, new Rectangle(window.Width / 2 - 16, window.Height - 96, 32, 32), laser, window);
             score = 0;
+            extraLifeScore = 10000;
+            centerText = "";
+
+            gameOver = false;
+            replay = null;
+
+            explosions = new List<Explosion>();
+            isGameOn = false;
+            IsMouseVisible = true;
+            // test
             base.Initialize();
         }
 
@@ -87,7 +96,14 @@ namespace Galaga
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            explosion = Content.Load<SoundEffect>("galaga_destroyed");
+            bossDamaged = Content.Load<SoundEffect>("bossgalaga_injured");
+            playerExplosion = Content.Load<SoundEffect>("fighter_destroyed");
+            extraShip = Content.Load<SoundEffect>("extra_ship");
             font1 = Content.Load<SpriteFont>("SpriteFont1");
+            Texture2D bannder = Content.Load<Texture2D>("banner");
+
+            titleScreen = new TitleScreen( bannder, font1 , window.Width , window.Height , GraphicsDevice);
         }
 
         /// <summary>
@@ -99,21 +115,135 @@ namespace Galaga
             // TODO: Unload any non ContentManager content here
         }
 
-		/// <summary>
-		/// Allows the game to run logic such as updating the world,
-		/// checking for collisions, gathering input, and playing audio.
-		/// </summary>
-		/// <param name="gameTime">Provides a snapshot of timing values.</param>
-		protected override void Update(GameTime gameTime)
-		{
-			// Allows the game to exit
-			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-				this.Exit();
-			field.Update(gameTime);
-			// TODO: Add your update logic here
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Update(GameTime gameTime)
+        {
+            // Allows the game to exit
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape) || GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+                this.Exit();
+            field.Update(gameTime);
+            // TODO: Add your update logic here
+            if (isGameOn)
+            {
+                if (timer != 0)
+                {
+                    centerText = "LEVEL " + levelNum;
+                    if (timer % 30 == 0)
+                        for (int c = 0; c < enemies[timer/ 30 - 1].Length; c++)
+                            if (enemies[timer / 30 - 1][c] != null)
+                                enemies[timer / 30 - 1][c].EnterScreenAt(c);
+                    timer--;
+                }
+                List<Bullet> bullets = p1.Bullets;
+                for (int r = 0; r < enemies.Length; r++)
+                    for (int c = 0; c < enemies[r].Length; c++)
+                        if (enemies[r][c] != null)
+                        {
+                            enemies[r][c].Update(gameTime);
+                            if (enemies[r][c].Bullet != null)
+                            {
+                                if (p1.Hitbox.Intersects(enemies[r][c].Bullet.Hitbox))
+                                {
+                                    if (!p1.IsInvincible)
+                                    {
+                                        p1.RemoveLife();
+                                        explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
+                                    }
+                                    enemies[r][c].RemoveBullet();
+                                }
+                                else if (!enemies[r][c].Bullet.Hitbox.Intersects(window))
+                                    enemies[r][c].RemoveBullet();
+                            }
+                            if (p1.Hitbox.Intersects(enemies[r][c].Hitbox))
+                            {
+                                explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
+                                enemies[r][c] = null;
+                                if (!p1.IsInvincible)
+                                {
+                                    p1.RemoveLife();
+                                    explosions.Add(new Explosion(tex, p1.Hitbox, playerExplosion, true));
+                                }
+                                break;
+                            }
+                            for (int i = bullets.Count - 1; i > -1; i--)
+                                if (enemies[r][c].Intersects(bullets[i]))
+                                {
+                                    if (enemies[r][c].Level != 4)
+                                    {
+                                        score += enemies[r][c].Level * 50 + (levelNum - 1) * 5;
+                                        explosions.Add(new Explosion(tex, enemies[r][c].Hitbox, explosion));
+                                        enemies[r][c] = null;
+                                    }
+                                    else
+                                        bossDamaged.Play();
+                                    p1.RemoveBulletAt(i);
+                                    break;
+                                }
+                        }
+                for (int i = bullets.Count - 1; i > -1; i--)
+                    if (!bullets[i].Hitbox.Intersects(window))
+                        p1.RemoveBulletAt(i);
+                if (ran.Next(150) < levelNum)
+                {
+                    int r = ran.Next(enemies.Length);
+                    int c = ran.Next(enemies[r].Length);
+                    if (enemies[r][c] != null)
+                        enemies[r][c].Move();
+                }
+                for (int i = explosions.Count - 1; i > -1; i--)
+                {
+                    explosions[i].Update(gameTime);
+                    if (explosions[i].Timer > 40)
+                        explosions.RemoveAt(i);
+                }
+                if (!gameOver)
+                {
+                    p1.Update(gameTime);
+                    if (p1.Timer != 0)
+                        centerText = "READY?";
+                    else if (timer == 0)
+                        centerText = "";
+                    if (p1.Lives < 0)
+                    {
+                        gameOver = true;
+                        replay = new Button("Main Menu", new Vector2(window.Width / 2 - 60, window.Height / 2 + 64), font1);
+                        for (int i = p1.Bullets.Count - 1; i > -1; i--)
+                            p1.RemoveBulletAt(i);
+                    }
+                }
+                else
+                {
+                    centerText = " GAME\n OVER";
+                    if (replay.preesed(Mouse.GetState().X, Mouse.GetState().Y) && Mouse.GetState().LeftButton == ButtonState.Pressed)
+                    {
+                        Initialize();
+                    }
+                }
+                if (score >= extraLifeScore)
+                {
+                    p1.AddLife();
+                    extraShip.Play();
+                    extraLifeScore += 10000;
+                }
 
-			base.Update(gameTime);
-		}
+                if (LevelOver())
+                {
+                    levelNum++;
+                    ReadLevelData();
+                }
+            }
+            else
+            {
+                isGameOn = titleScreen.update(Mouse.GetState().X, Mouse.GetState().Y, Mouse.GetState().LeftButton == ButtonState.Pressed, gameTime);
+            }
+            
+
+            base.Update(gameTime);
+        }
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -121,19 +251,78 @@ namespace Galaga
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-            spriteBatch.Begin();
-            field.Draw(gameTime, spriteBatch);
-            spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
+            
+            if (isGameOn)
+            {
+                GraphicsDevice.Clear(Color.Black);
+                spriteBatch.Begin();
+                field.Draw(gameTime, spriteBatch);
+                spriteBatch.DrawString(font1, score + "", new Vector2(0, 0), Color.White);
+                for (int r = 0; r < enemies.Length; r++)
+                    for (int c = 0; c < enemies[r].Length; c++)
+                        if (enemies[r][c] != null)
+                            enemies[r][c].Draw(spriteBatch, gameTime);
+                p1.Draw(spriteBatch, gameTime);
+                for (int i = 0; i < explosions.Count; i++)
+                    explosions[i].Draw(spriteBatch, gameTime);
+                spriteBatch.DrawString(font1, centerText, new Vector2(window.Width / 2 - 40, window.Height / 2 - 8), Color.Red);
+                if (replay != null)
+                    replay.Draw(spriteBatch);
+                int levelNumCopy = levelNum;
+                int x = 0;
+                for (int i = levelRecs.Length - 1; i > -1; i--)
+                    while (levelNumCopy >= levelValues[i])
+                    {
+                        levelNumCopy -= levelValues[i];
+                        x++;
+                    }
+                levelNumCopy = levelNum;
+                for (int i = levelRecs.Length - 1; i > -1; i--)
+                    while (levelNumCopy >= levelValues[i])
+                    {
+                        levelNumCopy -= levelValues[i];
+                        spriteBatch.Draw(tex, new Vector2(window.Width - x * 32, window.Height - 32), levelRecs[i], Color.White);
+                        x--;
+                    }
+                spriteBatch.End();
+                // TODO: Add your drawing code here
+            }
+            else
+            {
+                GraphicsDevice.Clear(Color.Black);
+                titleScreen.draw(spriteBatch , gameTime);
+            }
+            base.Draw(gameTime);
+        }
+
+        public void ReadLevelData()
+        {
+            timer = 150;
+            var lines = File.ReadAllLines("Level" + levelNum % 5 + ".txt");
+            lvlData = new string[lines.Length];
+            for (int i = 0; i < lines.Length; i++)
+                lvlData[i] = lines[i];
+            enemies = new Enemy[lvlData.Length][];
+            for (int r = 0; r < enemies.Length; r++)
+            {
+                enemies[r] = new Enemy[lvlData[r].Length];
+                for (int c = 0; c < enemies[r].Length; c++)
+                {
+                    if (lvlData[r].Substring(c, 1).Equals(" "))
+                        enemies[r][c] = null;
+                    else
+                        enemies[r][c] = new Enemy(tex, new Vector2(c * 32 + 32, (r + 1) * 32), int.Parse(lvlData[r].Substring(c, 1)), window);
+                }
+            }
+        }
+
+        public bool LevelOver()
+        {
             for (int r = 0; r < enemies.Length; r++)
                 for (int c = 0; c < enemies[r].Length; c++)
                     if (enemies[r][c] != null)
-                        enemies[r][c].Draw(spriteBatch, gameTime);
-            p1.Draw(spriteBatch, gameTime);
-            spriteBatch.End();
-            // TODO: Add your drawing code here
-
-            base.Draw(gameTime);
+                        return false;
+            return true;
         }
     }
 }
